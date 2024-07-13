@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chatbox Firebase</title>
+  <script src="https://www.gstatic.com/firebase/js/7.14.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebase/js/7.14.2/firebase-firestore.js"></script>
+  <script>
+    // Khởi tạo Firebase
+    const firebaseConfig = {
+      apiKey: "[API_KEY]",
+      authDomain: "[AUTH_DOMAIN]",
+      projectId: "[PROJECT_ID]",
+      storageBucket: "[STORAGE_BUCKET]",
+      messagingSenderId: "[MESSAGING_SENDER_ID]",
+      appId: "[APP_ID]"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    // Lấy tham chiếu đến bộ sưu tập tin nhắn
+    const db = firebase.firestore();
+    const messagesRef = db.collection('tin nhắn');
+
+    // Lấy hộp nhập tin nhắn và nút gửi
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+
+    // Thêm sự kiện click cho nút gửi
+    sendButton.addEventListener('click', () => {
+      const messageText = messageInput.value;
+      if (messageText) {
+        // Tạo tin nhắn mới
+        const message = {
+          người gửi: 'Bạn',
+          tin nhắn: messageText,
+          thời gian: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        // Gửi tin nhắn đến Firestore
+        messagesRef.add(message).then(() => {
+          messageInput.value = ''; // Xóa hộp nhập tin nhắn
+        });
+      }
+    });
+
+    // Lắng nghe các thay đổi trong bộ sưu tập tin nhắn
+    messagesRef.onSnapshot((snapshot) => {
+      const messages = snapshot.docs.map(doc => doc.data());
+      renderMessages(messages);
+    });
+
+    // Hàm hiển thị tin nhắn
+    function renderMessages(messages) {
+      const messagesList = document.getElementById('messagesList');
+      messagesList.innerHTML = '';
+
+      messages.forEach(message => {
+        const messageElement = document.createElement('li');
+        messageElement.textContent = `${message.người gửi}: ${message.tin nhắn}`;
+        messagesList.appendChild(messageElement);
+      });
+    }
+  </script>
+</head>
+<body>
+  <h1>Chatbox</h1>
+  <div id="chatbox">
+    <ul id="messagesList"></ul>
+    <input type="text" id="messageInput" placeholder="Nhập tin nhắn">
+    <button id="sendButton">Gửi</button>
+  </div>
+</body>
+</html>
